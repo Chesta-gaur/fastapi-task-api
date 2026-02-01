@@ -22,4 +22,5 @@ This project is for learning backend development fundamentals.
 
 ## Run Locally
 pip install -r requirements.txt
+
 uvicorn main:app --reload
