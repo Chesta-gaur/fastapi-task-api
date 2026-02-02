@@ -47,6 +47,7 @@ This project is for learning backend development fundamentals.
 
 ```bash
 pip install -r requirements.txt
+```
 
 
 🎯 Purpose of This Project :
