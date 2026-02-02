@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import FastAPI, HTTPException, Depends, Query
 from pydantic import BaseModel, Field
 from typing import Optional
 from database import engine, Base, SessionLocal
@@ -36,8 +36,9 @@ class TaskResponse(BaseModel):
     completed : bool
     priority : int
 
-    class Config:
-        orm_mode = True
+    model_config = {
+        "from_attributes" : True
+    }
 
 
 @app.get("/")
@@ -48,8 +49,24 @@ def home():
 
 
 @app.get("/tasks", response_model=list[TaskResponse])
-def get_tasks(db: Session = Depends(get_db)):
-    return db.query(Task).all()
+def get_tasks(
+        completed: Optional[bool] = Query(None),
+        priority: Optional[int] = Query(None, ge=1, le=5),
+        limit: int = Query(10, ge=1, le=100),
+        offset: int = Query(0, ge=0),
+        db: Session = Depends(get_db)
+    ):
+
+    query = db.query(Task)
+
+    if completed is not None:
+        query = query.filter(Task.completed == completed)
+
+    if priority is not None:
+        query = query.filter(Task.priority == priority)
+
+    tasks = query.offset(offset).limit(limit).all()
+    return tasks
 
 
 @app.post("/tasks",status_code=201, response_model=TaskResponse)
